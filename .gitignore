@@ -1,0 +1,15 @@
+.env
+*.db
+data/
+backend/.venv/
+backend/__pycache__/
+**/__pycache__/
+*.pyc
+frontend/node_modules/
+frontend/dist/
+.DS_Store
+HANDOVER.md
+backend/test_data/
+.pytest_cache/
+**/.pytest_cache/
+test_*.wav

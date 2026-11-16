@@ -1,0 +1,12 @@
+FROM ./gnani-evon-v3.3-30B-A3B-IQ4_XS.gguf
+# ChatML from gnani/gnani-evon-v3.3-30B-A3B chat_template.jinja, thinking disabled (<think></think> prefill)
+TEMPLATE """{{- if .System }}<|im_start|>system
+{{ .System }}<|im_end|>
+{{ end }}
+{{- range .Messages }}{{ if ne .Role "system" }}<|im_start|>{{ .Role }}
+{{ .Content }}<|im_end|>
+{{ end }}{{ end }}<|im_start|>assistant
+<think></think>"""
+PARAMETER stop <|im_end|>
+PARAMETER temperature 0.1
+PARAMETER num_ctx 4096

@@ -1,0 +1,40 @@
+const { chromium } = require("playwright");
+const BASE = "http://127.0.0.1:8000";
+const OUT = "/tmp/opencode/asha-qa";
+(async () => {
+  const browser = await chromium.launch({headless:true, executablePath:"/home/dangerking8x/.cache/ms-playwright/chromium-1248/chrome-linux64/chrome"});
+  const desktop = await browser.newContext({viewport:{width:1440,height:1000}, deviceScaleFactor:1.5, serviceWorkers:"block"});
+  const page = await desktop.newPage();
+  await page.goto(`${BASE}/login`, {waitUntil:"networkidle"});
+  await page.waitForTimeout(500);
+  await page.screenshot({path:`${OUT}/40-login-final.png`, fullPage:true});
+  await page.getByRole("button",{name:/Dr\. Rao/}).click();
+  await page.waitForURL("**/dashboard");
+  await page.waitForLoadState("networkidle");
+  await page.waitForTimeout(700);
+  await page.screenshot({path:`${OUT}/41-dashboard-final.png`, fullPage:true});
+  await desktop.close();
+
+  const mobile = await browser.newContext({viewport:{width:390,height:844}, deviceScaleFactor:2, isMobile:true, hasTouch:true, serviceWorkers:"block"});
+  const phone = await mobile.newPage();
+  await phone.goto(`${BASE}/login`, {waitUntil:"networkidle"});
+  await phone.getByRole("button",{name:/Lakshmi/}).click();
+  await phone.waitForURL(`${BASE}/`);
+  await phone.waitForLoadState("networkidle");
+  await phone.waitForTimeout(600);
+  await phone.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  await phone.waitForTimeout(400);
+  await phone.screenshot({path:`${OUT}/42-home-mobile-bottom-final.png`});
+  await phone.goto(`${BASE}/record`, {waitUntil:"networkidle"});
+  await phone.waitForTimeout(500);
+  await phone.screenshot({path:`${OUT}/43-record-mobile-final.png`, fullPage:true});
+  const lang = await phone.evaluate(() => {
+    const row = [...document.querySelectorAll("section")].find(s => s.textContent.includes("Language"));
+    const buttons = row ? [...row.querySelectorAll("button")] : [];
+    return {count: buttons.length, rights: buttons.map(b=>Math.round(b.getBoundingClientRect().right)), scrollWidth: document.documentElement.scrollWidth, innerWidth: innerWidth};
+  });
+  console.log("languages", JSON.stringify(lang));
+  await mobile.close();
+  await browser.close();
+  console.log("done");
+})().catch(e=>{console.error(e);process.exit(1)});
